@@ -1,0 +1,110 @@
+{
+	"annotations": {
+		"list": [
+			{
+				"builtIn": 1,
+				"datasource": {
+					"type": "grafana",
+					"uid": "-- Grafana --"
+				},
+				"enable": true,
+				"hide": true,
+				"iconColor": "rgba(0, 211, 255, 1)",
+				"name": "Annotations & Alerts",
+				"type": "dashboard"
+			}
+		]
+	},
+	"editable": true,
+	"fiscalYearStartMonth": 0,
+	"graphTooltip": 0,
+	"id": 4,
+	"links": [],
+	"panels": [
+		{
+			"datasource": {
+				"type": "influxdb",
+				"uid": "P5EE3C7C4D8A7B3C9"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green"
+							},
+							{
+								"color": "red",
+								"value": 250
+							}
+						]
+					},
+					"unit": "ms"
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 7,
+				"w": 12,
+				"x": 12,
+				"y": 0
+			},
+			"id": 1,
+			"options": {
+				"displayMode": "gradient",
+				"legend": {
+					"calcs": [],
+					"displayMode": "list",
+					"placement": "bottom",
+					"showLegend": false
+				},
+				"maxVizHeight": 300,
+				"minVizHeight": 16,
+				"minVizWidth": 8,
+				"namePlacement": "auto",
+				"orientation": "horizontal",
+				"reduceOptions": {
+					"calcs": [],
+					"fields": "",
+					"values": true
+				},
+				"showUnfilled": true,
+				"sizing": "auto",
+				"valueMode": "color"
+			},
+			"pluginVersion": "12.0.2",
+			"targets": [
+				{
+					"datasource": {
+						"type": "influxdb",
+						"uid": "P5EE3C7C4D8A7B3C9"
+					},
+					"query": "from(bucket: \"mybucket\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"spans\")\n  // Nur die Felder auswählen, die wir wirklich brauchen\n  |> filter(fn: (r) => r._field == \"duration_nano\" or r._field == \"span.name\")\n  // Daten umwandeln: Zeilen werden zu Spalten\n  |> pivot(\n    rowKey:[\"_time\", \"trace_id\", \"span_id\"],\n    columnKey: [\"_field\"],\n    valueColumn: \"_value\"\n  )\n  // Nur die Zeilen behalten, die einen Endpunkt-Namen haben\n  |> filter(fn: (r) => exists r[\"span.name\"])\n  // Nach Endpunkt-Namen gruppieren\n  |> group(columns: [\"span.name\"])\n  // Den Durchschnitt der Dauer für jede Gruppe berechnen\n  |> mean(column: \"duration_nano\")\n  // Ergebnis für bessere Lesbarkeit umrechnen und umbenennen\n  |> map(fn: (r) => ({\n    Endpoint: r[\"span.name\"],\n    // Umrechnung von Nanosekunden in Millisekunden\n    avg_duration_ms: float(v: r.duration_nano) / 1000000.0\n  }))\n  // Nur die relevanten Spalten für die Tabelle behalten\n  |> keep(columns: [\"Endpoint\", \"avg_duration_ms\"])",
+					"refId": "A"
+				}
+			],
+			"title": "HTTP Request average",
+			"type": "bargauge"
+		}
+	],
+	"preload": false,
+	"schemaVersion": 41,
+	"tags": [],
+	"templating": {
+		"list": []
+	},
+	"time": {
+		"from": "now-6h",
+		"to": "now"
+	},
+	"timepicker": {},
+	"timezone": "browser",
+	"title": "My Dashboard (Flux)",
+	"uid": "8fc98dce-3d09-49cb-a141-2059a289871a",
+	"version": 2
+}

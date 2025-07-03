@@ -1,0 +1,62 @@
+services:
+  influxdb-v1:
+    image: influxdb:1.8
+    ports:
+      - "8086:8086"
+    volumes:
+      - influx-v1_data:/var/lib/influxdb:rw
+    env_file:
+      - monitoring/influx/influxv1.env
+    environment:
+      - INFLUXDB_DATA_ENGINE=tsm1
+      - INFLUXDB_REPORTING_DISABLED=false
+      - INFLUXDB_HTTP_LOG_ENABLED=false
+      - INFLUXDB_META_LOGGING_ENABLED=false
+      - INFLUXDB_DATA_QUERY_LOG_ENABLED=false
+      - INFLUXDB_LOGGING_LEVEL=info
+  influxdb-v2:
+    image: influxdb:2.7
+    ports:
+      - "8087:8086"
+    env_file:
+      - monitoring/influx/influxv2.env
+    volumes:
+      - influx-v2_data:/var/lib/influxdb2:rw
+
+  telegraf:
+    image: telegraf:1.35
+    ports:
+      - "4317:4317" # grpc
+    #  - "4318:4318" # http
+    env_file:
+      - monitoring/influx/influxv1.env
+      - monitoring/influx/influxv2.env
+    volumes:
+      - ./monitoring/telegraf/mytelegraf.conf:/etc/telegraf/telegraf.conf:ro
+    depends_on:
+      - influxdb-v1
+      - influxdb-v2
+
+  grafana:
+    image: grafana/grafana
+    restart: unless-stopped
+    ports:
+      - "8282:3000"
+    env_file:
+      - monitoring/influx/influxv2.env
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_INSTALL_PLUGINS=jdbranham-diagram-panel,knightss27-weathermap-panel
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - influxdb-v1
+      - influxdb-v2
+
+volumes:
+  influx-v1_data:
+  influx-v2_data:
+  grafana_data:

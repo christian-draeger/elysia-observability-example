@@ -1,0 +1,28 @@
+apiVersion: 1
+
+datasources:
+  - name: InfluxDB-v2
+    type: influxdb
+    access: proxy
+    url: http://influxdb-v2:8086
+    basicAuth: false
+    isDefault: true
+    jsonData:
+      version: Flux
+      organization: myorg
+      defaultBucket: mybucket
+    secureJsonData:
+      token: mytoken
+
+  - name: InfluxDB-v1
+    type: influxdb
+    access: proxy
+    url: http://influxdb-v1:8086
+    basicAuth: false
+    isDefault: false
+    jsonData:
+      version: InfluxQL
+      dbName: mydb
+      user: user_ro
+    secureJsonData:
+      password: password

@@ -1,15 +1,37 @@
-# Elysia with Bun runtime
+# Elysia Observability Example
+This project showcases an observability stack.
 
-## Getting Started
-To get started with this template, simply paste this command into your terminal:
-```bash
-bun create elysia ./elysia-example
+```mermaid
+flowchart LR
+    subgraph app [Elysia App];
+    otel(Opentelemetry Exporter);
+    end;
+    subgraph collector [Collector];
+    telegraf[Telegraf];
+    end
+    subgraph tsdb [Time-Series Database];
+    db[(Influx)];
+    end
+    subgraph ui [Visualization];
+    grafana[Grafana];
+    end
+    otel --> telegraf;
+    telegraf --> db;
+    db --> grafana;
 ```
 
 ## Development
 To start the development server run:
 ```bash
+docker compose up -d
 bun run dev
 ```
 
-Open http://localhost:3000/ with your browser to see the result.
+## How to use
+Elysia app: http://localhost:3000/swagger
+Grafana: http://localhost:8282/dashboards
+
+## Screenshots
+![dashboard-top.png](docs/dashboard-top.png)
+
+![dashboard-bottom.png](docs/dashboard-bottom.png)
