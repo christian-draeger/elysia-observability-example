@@ -10,14 +10,17 @@ flowchart LR
     telegraf[Telegraf];
     end
     subgraph tsdb [Time-Series Database];
-    db[(Influx)];
+    db1[(Influx-v1)];
+    db2[(Influx-v2)];
     end
     subgraph ui [Visualization];
     grafana[Grafana];
     end
     otel --> telegraf;
-    telegraf --> db;
-    db --> grafana;
+    telegraf --> db1;
+    telegraf --> db2;
+    db1 --> grafana;
+    db2 --> grafana;
 ```
 
 ## Development
