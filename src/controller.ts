@@ -1,38 +1,30 @@
-import {sleep} from "bun";
-import {status, t, Elysia} from "elysia";
-import {store} from "./store";
+import {Elysia, status, t} from "elysia";
+import {EventSchema, store} from "./store";
 
-export const controller = new Elysia().get("/", () => {
-    return "GET /";
-})
+export const controller = new Elysia()
+    .get('/', ({redirect}) => {
+        return redirect('http://localhost:8282/dashboards');
+    })
     .get("/health", () => ({
         status: "OK",
     }))
-    .get("/delay", () => {
-        sleep(1000);
-        return "GET /delay";
-    })
-    .get("/error/:code", ({ params }) => {
-        return status(Number.parseInt(params.code));
-    })
-
     .group("/store", (app) =>
         app
             .get("/", () => Object.fromEntries(store))
             .post(
                 "/",
-                ({ body }) => {
+                ({body}) => {
                     store.set(body.key, body.value);
                     return status(201);
                 },
                 {
                     body: t.Object({
                         key: t.String(),
-                        value: t.String(),
+                        value: EventSchema,
                     }),
                 }
             )
-            .delete("/:key", ({ params: { key } }) => {
+            .delete("/:key", ({params: {key}}) => {
                 store.delete(key);
                 return status(204);
             })

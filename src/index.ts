@@ -4,6 +4,7 @@ import {observability} from "./observability";
 import swagger from "@elysiajs/swagger";
 import {appConfig} from "./appConfig";
 import {controller} from "./controller";
+import {emulateApplicationToBeInUse} from "./emulator";
 
 const app = new Elysia()
     .use(observability)
@@ -14,3 +15,5 @@ const app = new Elysia()
 console.log(
     `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
 );
+
+emulateApplicationToBeInUse();
