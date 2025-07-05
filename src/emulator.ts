@@ -1,31 +1,73 @@
 import {store} from "./store";
 
-const API_URL = "http://localhost:3000/store";
+async function randomApiUsage() {
+    const API_URL = "http://localhost:3000/store";
+    const actions = ["get_health", "get_all", "post_event", "delete_event"];
+    const randomAction = actions[Math.floor(Math.random() * actions.length)];
 
-async function insertEvent() {
+    try {
+        switch (randomAction) {
+            case "get_health":
+                console.log("[RANDOM_API] Calling GET /health");
+                await fetch("http://localhost:3000/health");
+                break;
+
+            case "get_all":
+                console.log("[RANDOM_API] Calling GET /store");
+                await fetch(API_URL);
+                break;
+
+            case "post_event":
+                console.log("[RANDOM_API] Calling POST /store via insertEvent");
+                const status = "pending";
+                const id = Bun.randomUUIDv7();
+
+                const requestBody = {
+                    key: id,
+                    value: {id, status, retries: 0},
+                };
+
+                await fetch(API_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(requestBody),
+                });
+                break;
+
+            case "delete_event":
+                const keys = Array.from(store.keys());
+                if (keys.length > 0) {
+                    const keyToDelete = keys[Math.floor(Math.random() * keys.length)];
+                    console.log(`[RANDOM_API] Calling DELETE /store/${keyToDelete}`);
+                    await fetch(`${API_URL}/${keyToDelete}`, { method: "DELETE" });
+                } else {
+                    console.log("[RANDOM_API] Skipped DELETE, store is empty.");
+                }
+                break;
+        }
+    } catch (error) {
+        console.error(`[RANDOM_API] Error during ${randomAction}:`, error);
+    }
+}
+
+function emulateRandomApiUsage(frequencyInMillis: number) {
+    setInterval(randomApiUsage, frequencyInMillis);
+}
+
+async function createEvent() {
     const status = "pending";
     const id = Bun.randomUUIDv7();
-
-    const requestBody = {
-        key: id,
-        value: {id, status, retries: 0},
-    };
-
-    return await fetch(API_URL, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-    });
+    store.set(id, {id, status, retries: 0});
 }
 
 function createRampUpData(amount: number) {
-    (async () => await Promise.all(Array.from({length: amount}, () => insertEvent())))();
+    (async () => await Promise.all(Array.from({length: amount}, () => createEvent())))();
 }
 
 function emulateProducer(frequencyInMillis: number) {
-    setInterval(async () => insertEvent(), frequencyInMillis);
+    setInterval(async () => createEvent(), frequencyInMillis);
 }
 
 function emulateEventProcessing(frequencyInMillis: number) {
@@ -92,4 +134,5 @@ export function emulateApplicationToBeInUse() {
     emulateProducer(1_500);
     emulateEventProcessing(500)
     cleanupJob(30_000)
+    emulateRandomApiUsage(2_000)
 }
