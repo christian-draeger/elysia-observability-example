@@ -96,7 +96,7 @@
 			},
 			"gridPos": {
 				"h": 8,
-				"w": 8,
+				"w": 7,
 				"x": 0,
 				"y": 1
 			},
@@ -234,8 +234,8 @@
 			},
 			"gridPos": {
 				"h": 8,
-				"w": 16,
-				"x": 8,
+				"w": 17,
+				"x": 7,
 				"y": 1
 			},
 			"id": 11,
@@ -324,7 +324,7 @@
 			},
 			"gridPos": {
 				"h": 9,
-				"w": 8,
+				"w": 7,
 				"x": 0,
 				"y": 10
 			},
@@ -353,13 +353,329 @@
 						"type": "influxdb",
 						"uid": "P23E11220484DAF80"
 					},
+					"groupBy": [
+						{
+							"params": [
+								"$__interval"
+							],
+							"type": "time"
+						},
+						{
+							"params": [
+								"null"
+							],
+							"type": "fill"
+						}
+					],
+					"measurement": "store.events.by_status.total",
+					"orderByTime": "ASC",
+					"policy": "default",
 					"query": "SELECT last(\"gauge\") FROM \"store.entries.total\" WHERE $timeFilter GROUP BY time($__interval) fill(null)",
-					"rawQuery": true,
+					"rawQuery": false,
 					"refId": "A",
-					"resultFormat": "time_series"
+					"resultFormat": "time_series",
+					"select": [
+						[
+							{
+								"params": [
+									"gauge"
+								],
+								"type": "field"
+							},
+							{
+								"params": [],
+								"type": "sum"
+							}
+						]
+					],
+					"tags": []
 				}
 			],
 			"title": "Current Store Size",
+			"type": "stat"
+		},
+		{
+			"datasource": {
+				"type": "influxdb",
+				"uid": "P23E11220484DAF80"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"axisBorderShow": false,
+						"axisCenteredZero": false,
+						"axisColorMode": "text",
+						"axisLabel": "",
+						"axisPlacement": "auto",
+						"barAlignment": 0,
+						"barWidthFactor": 0.6,
+						"drawStyle": "line",
+						"fillOpacity": 0,
+						"gradientMode": "none",
+						"hideFrom": {
+							"legend": false,
+							"tooltip": false,
+							"viz": false
+						},
+						"insertNulls": false,
+						"lineInterpolation": "smooth",
+						"lineStyle": {
+							"fill": "solid"
+						},
+						"lineWidth": 1,
+						"pointSize": 5,
+						"scaleDistribution": {
+							"type": "linear"
+						},
+						"showPoints": "auto",
+						"spanNulls": true,
+						"stacking": {
+							"group": "A",
+							"mode": "none"
+						},
+						"thresholdsStyle": {
+							"mode": "off"
+						}
+					},
+					"decimals": 0,
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green"
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					}
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 9,
+				"w": 17,
+				"x": 7,
+				"y": 10
+			},
+			"id": 2,
+			"options": {
+				"legend": {
+					"calcs": [],
+					"displayMode": "list",
+					"placement": "bottom",
+					"showLegend": true
+				},
+				"tooltip": {
+					"hideZeros": false,
+					"mode": "single",
+					"sort": "none"
+				}
+			},
+			"pluginVersion": "12.0.2",
+			"targets": [
+				{
+					"datasource": {
+						"type": "influxdb",
+						"uid": "P23E11220484DAF80"
+					},
+					"groupBy": [
+						{
+							"params": [
+								"$__interval"
+							],
+							"type": "time"
+						},
+						{
+							"params": [
+								"status::tag"
+							],
+							"type": "tag"
+						}
+					],
+					"measurement": "store.events.by_status.total",
+					"orderByTime": "ASC",
+					"policy": "default",
+					"query": "SELECT mean(\"gauge\") FROM \"store.events.by_status.total\" WHERE $timeFilter GROUP BY time($__interval), \"status\"",
+					"rawQuery": false,
+					"refId": "A",
+					"resultFormat": "time_series",
+					"select": [
+						[
+							{
+								"params": [
+									"gauge"
+								],
+								"type": "field"
+							},
+							{
+								"params": [],
+								"type": "mean"
+							}
+						]
+					],
+					"tags": []
+				},
+				{
+					"alias": "store size",
+					"datasource": {
+						"type": "influxdb",
+						"uid": "P23E11220484DAF80"
+					},
+					"groupBy": [
+						{
+							"params": [
+								"$__interval"
+							],
+							"type": "time"
+						},
+						{
+							"params": [
+								"null"
+							],
+							"type": "fill"
+						}
+					],
+					"hide": false,
+					"measurement": "store.events.by_status.total",
+					"orderByTime": "ASC",
+					"policy": "default",
+					"refId": "B",
+					"resultFormat": "time_series",
+					"select": [
+						[
+							{
+								"params": [
+									"gauge"
+								],
+								"type": "field"
+							},
+							{
+								"params": [],
+								"type": "sum"
+							}
+						]
+					],
+					"tags": []
+				}
+			],
+			"title": "Store Size by Event Status",
+			"type": "timeseries"
+		},
+		{
+			"datasource": {
+				"type": "influxdb",
+				"uid": "P23E11220484DAF80"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"fieldMinMax": false,
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green"
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					},
+					"unit": "short"
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 4,
+				"w": 7,
+				"x": 0,
+				"y": 19
+			},
+			"id": 13,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "none",
+				"justifyMode": "auto",
+				"orientation": "auto",
+				"percentChangeColorMode": "inverted",
+				"reduceOptions": {
+					"calcs": [
+						"lastNotNull"
+					],
+					"fields": "",
+					"values": false
+				},
+				"showPercentChange": true,
+				"textMode": "auto",
+				"wideLayout": true
+			},
+			"pluginVersion": "12.0.2",
+			"targets": [
+				{
+					"datasource": {
+						"type": "influxdb",
+						"uid": "P23E11220484DAF80"
+					},
+					"groupBy": [
+						{
+							"params": [
+								"$__interval"
+							],
+							"type": "time"
+						},
+						{
+							"params": [
+								"null"
+							],
+							"type": "fill"
+						}
+					],
+					"measurement": "store.events.by_status.total",
+					"orderByTime": "ASC",
+					"policy": "default",
+					"query": "",
+					"refId": "A",
+					"resultFormat": "time_series",
+					"select": [
+						[
+							{
+								"params": [
+									"gauge"
+								],
+								"type": "field"
+							},
+							{
+								"params": [],
+								"type": "sum"
+							}
+						]
+					],
+					"tags": [
+						{
+							"key": "status::tag",
+							"operator": "=",
+							"value": "pending"
+						},
+						{
+							"condition": "OR",
+							"key": "status::tag",
+							"operator": "=",
+							"value": "failed"
+						}
+					]
+				}
+			],
+			"title": "Lag",
 			"type": "stat"
 		},
 		{
@@ -390,10 +706,10 @@
 				"overrides": []
 			},
 			"gridPos": {
-				"h": 9,
-				"w": 16,
-				"x": 8,
-				"y": 10
+				"h": 10,
+				"w": 17,
+				"x": 7,
+				"y": 19
 			},
 			"id": 12,
 			"options": {
@@ -460,15 +776,36 @@
 			"pluginVersion": "1.10.4",
 			"targets": [
 				{
-					"alias": "store",
+					"alias": "manager",
 					"datasource": {
 						"type": "influxdb",
 						"uid": "P23E11220484DAF80"
 					},
+					"groupBy": [],
+					"measurement": "store.events.by_status.total",
+					"orderByTime": "ASC",
+					"policy": "default",
 					"query": "SELECT count(\"duration_nano\") FROM \"spans\" WHERE \"span.name\" =~ /\\// AND $timeFilter GROUP BY time($__interval)",
-					"rawQuery": true,
+					"rawQuery": false,
 					"refId": "A",
-					"resultFormat": "time_series"
+					"resultFormat": "time_series",
+					"select": [
+						[
+							{
+								"params": [
+									"gauge"
+								],
+								"type": "field"
+							}
+						]
+					],
+					"tags": [
+						{
+							"key": "status::tag",
+							"operator": "=",
+							"value": "pending"
+						}
+					]
 				},
 				{
 					"alias": "dlq",
@@ -476,11 +813,32 @@
 						"type": "influxdb",
 						"uid": "P23E11220484DAF80"
 					},
+					"groupBy": [],
 					"hide": false,
+					"measurement": "store.events.by_status.total",
+					"orderByTime": "ASC",
+					"policy": "default",
 					"query": "SELECT count(\"duration_nano\") FROM \"spans\" WHERE \"span.name\" =~ /\\// AND $timeFilter GROUP BY time($__interval)",
-					"rawQuery": true,
+					"rawQuery": false,
 					"refId": "B",
-					"resultFormat": "time_series"
+					"resultFormat": "time_series",
+					"select": [
+						[
+							{
+								"params": [
+									"gauge"
+								],
+								"type": "field"
+							}
+						]
+					],
+					"tags": [
+						{
+							"key": "status::tag",
+							"operator": "=",
+							"value": "dead-letter"
+						}
+					]
 				},
 				{
 					"alias": "failed",
@@ -488,11 +846,32 @@
 						"type": "influxdb",
 						"uid": "P23E11220484DAF80"
 					},
+					"groupBy": [],
 					"hide": false,
+					"measurement": "store.events.by_status.total",
+					"orderByTime": "ASC",
+					"policy": "default",
 					"query": "SELECT count(\"duration_nano\") FROM \"spans\" WHERE \"span.name\" =~ /\\// AND $timeFilter GROUP BY time($__interval)",
-					"rawQuery": true,
+					"rawQuery": false,
 					"refId": "C",
-					"resultFormat": "time_series"
+					"resultFormat": "time_series",
+					"select": [
+						[
+							{
+								"params": [
+									"gauge"
+								],
+								"type": "field"
+							}
+						]
+					],
+					"tags": [
+						{
+							"key": "status::tag",
+							"operator": "=",
+							"value": "failed"
+						}
+					]
 				},
 				{
 					"alias": "acked",
@@ -500,11 +879,32 @@
 						"type": "influxdb",
 						"uid": "P23E11220484DAF80"
 					},
+					"groupBy": [],
 					"hide": false,
+					"measurement": "store.events.by_status.total",
+					"orderByTime": "ASC",
+					"policy": "default",
 					"query": "SELECT count(\"duration_nano\") FROM \"spans\" WHERE \"span.name\" =~ /\\// AND $timeFilter GROUP BY time($__interval)",
-					"rawQuery": true,
+					"rawQuery": false,
 					"refId": "D",
-					"resultFormat": "time_series"
+					"resultFormat": "time_series",
+					"select": [
+						[
+							{
+								"params": [
+									"gauge"
+								],
+								"type": "field"
+							}
+						]
+					],
+					"tags": [
+						{
+							"key": "status::tag",
+							"operator": "=",
+							"value": "acked"
+						}
+					]
 				}
 			],
 			"title": "Event Throughput",
@@ -518,45 +918,8 @@
 			"fieldConfig": {
 				"defaults": {
 					"color": {
-						"mode": "palette-classic"
+						"mode": "thresholds"
 					},
-					"custom": {
-						"axisBorderShow": false,
-						"axisCenteredZero": false,
-						"axisColorMode": "text",
-						"axisLabel": "",
-						"axisPlacement": "auto",
-						"barAlignment": 0,
-						"barWidthFactor": 0.6,
-						"drawStyle": "line",
-						"fillOpacity": 0,
-						"gradientMode": "none",
-						"hideFrom": {
-							"legend": false,
-							"tooltip": false,
-							"viz": false
-						},
-						"insertNulls": false,
-						"lineInterpolation": "smooth",
-						"lineStyle": {
-							"fill": "solid"
-						},
-						"lineWidth": 1,
-						"pointSize": 5,
-						"scaleDistribution": {
-							"type": "linear"
-						},
-						"showPoints": "auto",
-						"spanNulls": false,
-						"stacking": {
-							"group": "A",
-							"mode": "none"
-						},
-						"thresholdsStyle": {
-							"mode": "off"
-						}
-					},
-					"decimals": 0,
 					"mappings": [],
 					"thresholds": {
 						"mode": "absolute",
@@ -569,35 +932,34 @@
 								"value": 80
 							}
 						]
-					},
-					"unit": "short"
+					}
 				},
 				"overrides": []
 			},
 			"gridPos": {
-				"h": 5,
-				"w": 24,
+				"h": 6,
+				"w": 7,
 				"x": 0,
-				"y": 19
+				"y": 23
 			},
-			"id": 2,
+			"id": 14,
 			"options": {
-				"legend": {
+				"minVizHeight": 75,
+				"minVizWidth": 75,
+				"orientation": "auto",
+				"reduceOptions": {
 					"calcs": [],
-					"displayMode": "list",
-					"placement": "bottom",
-					"showLegend": false
+					"fields": "",
+					"values": false
 				},
-				"tooltip": {
-					"hideZeros": false,
-					"mode": "single",
-					"sort": "none"
-				}
+				"showThresholdLabels": false,
+				"showThresholdMarkers": true,
+				"sizing": "auto"
 			},
 			"pluginVersion": "12.0.2",
 			"targets": [
 				{
-					"alias": "",
+					"alias": "retries",
 					"datasource": {
 						"type": "influxdb",
 						"uid": "P23E11220484DAF80"
@@ -605,43 +967,39 @@
 					"groupBy": [
 						{
 							"params": [
-								"$__interval"
+								"$interval"
 							],
 							"type": "time"
-						},
-						{
-							"params": [
-								"null"
-							],
-							"type": "fill"
 						}
 					],
-					"measurement": "store.entries.total",
+					"measurement": "store.events.retry.total",
 					"orderByTime": "ASC",
 					"policy": "default",
-					"query": "SELECT \"gauge\" FROM \"store.entries.total\" WHERE $timeFilter",
-					"rawQuery": true,
 					"refId": "A",
 					"resultFormat": "time_series",
 					"select": [
 						[
 							{
 								"params": [
-									"value"
+									"counter"
 								],
 								"type": "field"
 							},
 							{
 								"params": [],
 								"type": "mean"
+							},
+							{
+								"params": [],
+								"type": "non_negative_difference"
 							}
 						]
 					],
 					"tags": []
 				}
 			],
-			"title": "Store Size",
-			"type": "timeseries"
+			"title": "Error Rate",
+			"type": "gauge"
 		},
 		{
 			"collapsed": false,
@@ -649,7 +1007,7 @@
 				"h": 1,
 				"w": 24,
 				"x": 0,
-				"y": 24
+				"y": 29
 			},
 			"id": 7,
 			"panels": [],
@@ -717,10 +1075,10 @@
 				]
 			},
 			"gridPos": {
-				"h": 10,
-				"w": 14,
+				"h": 8,
+				"w": 12,
 				"x": 0,
-				"y": 25
+				"y": 30
 			},
 			"id": 4,
 			"options": {
@@ -983,10 +1341,10 @@
 				"overrides": []
 			},
 			"gridPos": {
-				"h": 10,
-				"w": 10,
-				"x": 14,
-				"y": 25
+				"h": 8,
+				"w": 12,
+				"x": 12,
+				"y": 30
 			},
 			"id": 6,
 			"options": {
@@ -1034,5 +1392,5 @@
 	"timezone": "browser",
 	"title": "My Dashboard InfluxQL",
 	"uid": "8fc98dce-3d09-49cb-a141-2059a289871b",
-	"version": 4
+	"version": 2
 }

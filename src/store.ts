@@ -43,8 +43,27 @@ class Store extends Map<string, Event> {
 
 export const store = new Store();
 
-const storeEntriesTotal = getMeter().createObservableGauge("store.entries.total");
+const storeEventsByStatus = getMeter().createObservableGauge(
+    "store.events.by_status.total",
+    {
+        description: "Current number of events in the store, by status.",
+    },
+);
 
-storeEntriesTotal.addCallback((observableResult) => {
-    observableResult.observe(store.size);
+storeEventsByStatus.addCallback((observableResult) => {
+    for (const status of STATUSES) {
+        const count = store.findByStatus(status).length;
+        observableResult.observe(count, { status });
+    }
+});
+
+export const eventStatusChangeCounter = getMeter().createCounter(
+    "store.events.status_change.total",
+    {
+        description: "Counts the total number of event status changes.",
+    },
+);
+
+export const eventRetryCounter = getMeter().createCounter("store.events.retry.total", {
+    description: "Counts the total number of retry attempts.",
 });

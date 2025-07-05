@@ -1,4 +1,4 @@
-import {store} from "./store";
+import {eventRetryCounter, eventStatusChangeCounter, store} from "./store";
 
 async function randomApiUsage() {
     const API_URL = "http://localhost:3000/store";
@@ -37,7 +37,7 @@ async function randomApiUsage() {
                 break;
 
             case "delete_event":
-                const keys = Array.from(store.keys());
+                const keys = store.findFullyProcessed();
                 if (keys.length > 0) {
                     const keyToDelete = keys[Math.floor(Math.random() * keys.length)];
                     console.log(`[RANDOM_API] Calling DELETE /store/${keyToDelete}`);
@@ -73,42 +73,55 @@ function emulateProducer(frequencyInMillis: number) {
 function emulateEventProcessing(frequencyInMillis: number) {
     setInterval(() => {
         const pendingEvents = store.findByStatus("pending");
-        const eventToProcess =
-            pendingEvents[Math.floor(Math.random() * pendingEvents.length)];
+        const failedEvents = store.findByStatus("failed");
+        const eventsToProcess = [...pendingEvents, ...failedEvents];
+
+        if (eventsToProcess.length === 0) return;
+
+        const event =
+            eventsToProcess[Math.floor(Math.random() * eventsToProcess.length)];
 
         const isSuccess = Math.random() < 0.6; // 60% success rate
 
         if (isSuccess) {
-            store.set(eventToProcess.id, {
-                ...eventToProcess,
+            store.set(event.id, {
+                ...event,
                 status: "acked",
                 fullyProcessedAt: Date.now(),
             });
+            eventStatusChangeCounter.add(1, { status: "acked" });
             console.info(
-                `[WORKER] Event succeeded: ID ${eventToProcess.id} -> acked`,
+                `[WORKER] Event succeeded: ID ${event.id} -> acked`,
             );
         } else {
-            const newRetryCount = eventToProcess.retries + 1;
+            const newRetryCount = event.retries + 1;
 
             if (newRetryCount >= 3) {
-                store.set(eventToProcess.id, {
-                    ...eventToProcess,
+                store.set(event.id, {
+                    ...event,
                     status: "dead-letter",
                     retries: newRetryCount,
                 });
+
+                eventStatusChangeCounter.add(1, { status: "dead-letter" });
+
                 console.warn(
-                    `[WORKER] Event Error (retry-limit reached): ID ${eventToProcess.id} -> dead-letter`,
+                    `[WORKER] Event Error (retry-limit reached): ID ${event.id} -> dead-letter`,
                 );
             } else {
-                store.set(eventToProcess.id, {
-                    ...eventToProcess,
-                    status: "pending",
+                store.set(event.id, {
+                    ...event,
+                    status: "failed",
                     retries: newRetryCount,
                 });
+
+                eventStatusChangeCounter.add(1, { status: "failed" });
+
                 console.log(
-                    `[WORKER] Event Error (try ${newRetryCount}/3): ID ${eventToProcess.id} -> back to queue`,
+                    `[WORKER] Event Error (try ${newRetryCount}/3): ID ${event.id} -> back to queue`,
                 );
             }
+            eventRetryCounter.add(1);
         }
     }, frequencyInMillis);
 }
